@@ -17,13 +17,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mHealthView = (HealthView) findViewById(R.id.healthView);
 
-        mHealthView.start(new int[]{1000, 2000, 3345, 4456, 7788, 8877, 12050}, 7890, 7);
+        mHealthView.start(new int[]{1000, 2000, 3345, 4456, 7788, 8877, 12050}, 7890, 7, R.mipmap.profile, "蜡笔小新");
 
         mHealthView.setOnLookClickListener(new HealthView.OnLookClickListener() {
             @Override
             public void onClick() {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/HelloCj/HealthViewDemo"));
-                intent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
+                intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
                 startActivity(intent);
 
             }

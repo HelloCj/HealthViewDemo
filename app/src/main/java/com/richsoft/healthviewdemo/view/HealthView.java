@@ -15,12 +15,12 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.richsoft.healthviewdemo.R;
 import com.richsoft.healthviewdemo.utils.DateUtil;
 
 import java.util.List;
@@ -100,10 +100,13 @@ public class HealthView extends View {
 
     /*----------------------------最下层文字画笔---------------------------------------------*/
     private Paint mChampionTextPaint;//冠军文字画笔
+    private String mChampionName;//冠军名字
 
+    /*---------------------------------圆角头像------------------------------------------------------*/
     private Paint mProfilePaint;//头像画笔
-    private Bitmap mProfileBitmap;
+    private Bitmap mProfileBitmap;//头像画笔
     private Rect mPfofileRect;//头像绘制矩形
+    private int mProfileDrawableResId;
 
     private float mRatio;//自定义View宽高比例
 
@@ -145,7 +148,6 @@ public class HealthView extends View {
 
         //圆弧的画笔
         mArcPaint = new Paint();
-        mArcPaint.setColor(mThemeColor);//画笔颜色
         mArcPaint.setAntiAlias(true);//设置抗锯齿
         mArcPaint.setStyle(Paint.Style.STROKE);//设置空心
         mArcPaint.setDither(true);//防抖动
@@ -221,7 +223,7 @@ public class HealthView extends View {
         //绘制头像
         mProfilePaint = new Paint();
         mProfilePaint.setAntiAlias(true);//抗锯齿
-
+        mPfofileRect = new Rect();
     }
 
     @Override
@@ -234,6 +236,9 @@ public class HealthView extends View {
         mBackgroundPaint.setColor(mBackgroundDefaultColor);
         drawUpBackground(0, 0, mWidth, mWidth, mBackgroundCorner, canvas, mBackgroundPaint);
         //绘制圆弧
+        mArcPaint.setColor(Color.parseColor("#C1C1C1"));
+        canvas.drawArc(mArcRectF, 120, 300, false, mArcPaint);
+        mArcPaint.setColor(mThemeColor);
         canvas.drawArc(mArcRectF, 120, 300 * percent, false, mArcPaint);
         //绘制圆弧里面的文字
         //setTextSize必须在onDraw()里面,否则文字不显示,原因还没找到
@@ -275,13 +280,11 @@ public class HealthView extends View {
         //绘制下层文字
         mChampionTextPaint.setTextSize(18.f / 450.f * mWidth);
         mChampionTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("LBJ获得今日冠军", 70.f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth - mChampionTextPaint.getFontMetrics().top / 2 - mChampionTextPaint.getFontMetrics().bottom / 2, mChampionTextPaint);
+        canvas.drawText(mChampionName + "获得今日冠军", 70.f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth - mChampionTextPaint.getFontMetrics().top / 2 - mChampionTextPaint.getFontMetrics().bottom / 2, mChampionTextPaint);
         mChampionTextPaint.setTextSize(15.f / 450.f * mWidth);
         mChampionTextPaint.setTextAlign(Paint.Align.RIGHT);
         canvas.drawText("查看 >", 425f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth - mChampionTextPaint.getFontMetrics().top / 2 - mChampionTextPaint.getFontMetrics().bottom / 2, mChampionTextPaint);
         //绘制头像
-        mProfileBitmap = toRoundBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.profile));
-        mPfofileRect = new Rect();
         int rectWidth = (int) (30.f / 525.f * mHeight);//矩形的宽度
         mPfofileRect.top = (int) ((mHeight - mWidth) / 2.f + mWidth - rectWidth / 2.f);
         mPfofileRect.left = (int) (30.f / 450 * mWidth);
@@ -388,11 +391,22 @@ public class HealthView extends View {
 
     /**
      * 初始化数据
+     *
+     * @param steps        最近7天步数
+     * @param averageStep  好友平均步数
+     * @param range        排名
+     * @param res          头像资源
+     * @param championName 冠军名字
      */
-    public void start(int[] steps, int averageStep, int range) {
+    public void start(int[] steps, int averageStep, int range, @DrawableRes int res, String championName) {
         this.steps = steps;
-        mAverageStep = averageStep;
+        this.mAverageStep = averageStep;
         this.range = range;
+        this.mProfileDrawableResId = res;
+        this.mChampionName = championName;
+
+        mProfileBitmap = toRoundBitmap(BitmapFactory.decodeResource(getResources(), mProfileDrawableResId));
+
         //步数动画
         ValueAnimator valueAnimatorStep = ValueAnimator.ofInt(0, steps[steps.length - 1]);
         valueAnimatorStep.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -470,7 +484,7 @@ public class HealthView extends View {
      * 转化为圆角bitmap
      *
      * @param bitmap
-     * @return
+     * @return Bitmap
      */
     private Bitmap toRoundBitmap(Bitmap bitmap) {
         int width = bitmap.getWidth();
@@ -487,4 +501,13 @@ public class HealthView extends View {
         return bgBitmap;
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mProfileBitmap != null) {
+            mProfileBitmap.recycle();
+            mProfileBitmap = null;
+            System.gc();
+        }
+    }
 }
