@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         mHealthView.setOnLookClickListener(new HealthView.OnLookClickListener() {
             @Override
             public void onClick() {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("www.baidu.com"));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/HelloCj/HealthViewDemo"));
                 intent.setClassName("com.android.browser","com.android.browser.BrowserActivity");
                 startActivity(intent);
 

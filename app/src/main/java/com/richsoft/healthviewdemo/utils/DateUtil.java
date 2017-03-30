@@ -21,7 +21,7 @@ public class DateUtil {
      * @return 时间
      */
     public static String getCurrentHoursAndMin() {
-        int hours = Calendar.getInstance().get(Calendar.HOUR);
+        int hours = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int min = Calendar.getInstance().get(Calendar.MINUTE);
         return hours + ":" + (min < 10 ? "0" + min : min);
     }

@@ -3,18 +3,24 @@ package com.richsoft.healthviewdemo.view;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.richsoft.healthviewdemo.R;
 import com.richsoft.healthviewdemo.utils.DateUtil;
 
 import java.util.List;
@@ -94,6 +100,10 @@ public class HealthView extends View {
 
     /*----------------------------最下层文字画笔---------------------------------------------*/
     private Paint mChampionTextPaint;//冠军文字画笔
+
+    private Paint mProfilePaint;//头像画笔
+    private Bitmap mProfileBitmap;
+    private Rect mPfofileRect;//头像绘制矩形
 
     private float mRatio;//自定义View宽高比例
 
@@ -207,6 +217,11 @@ public class HealthView extends View {
         mChampionTextPaint = new Paint();
         mChampionTextPaint.setAntiAlias(true);
         mChampionTextPaint.setColor(Color.WHITE);
+
+        //绘制头像
+        mProfilePaint = new Paint();
+        mProfilePaint.setAntiAlias(true);//抗锯齿
+
     }
 
     @Override
@@ -260,10 +275,19 @@ public class HealthView extends View {
         //绘制下层文字
         mChampionTextPaint.setTextSize(18.f / 450.f * mWidth);
         mChampionTextPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("LBJ获得今日冠军", 50.f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth, mChampionTextPaint);
+        canvas.drawText("LBJ获得今日冠军", 70.f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth - mChampionTextPaint.getFontMetrics().top / 2 - mChampionTextPaint.getFontMetrics().bottom / 2, mChampionTextPaint);
         mChampionTextPaint.setTextSize(15.f / 450.f * mWidth);
         mChampionTextPaint.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText("查看 >", 425f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth, mChampionTextPaint);
+        canvas.drawText("查看 >", 425f / 450.f * mWidth, (mHeight - mWidth) / 2.f + mWidth - mChampionTextPaint.getFontMetrics().top / 2 - mChampionTextPaint.getFontMetrics().bottom / 2, mChampionTextPaint);
+        //绘制头像
+        mProfileBitmap = toRoundBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.profile));
+        mPfofileRect = new Rect();
+        int rectWidth = (int) (30.f / 525.f * mHeight);//矩形的宽度
+        mPfofileRect.top = (int) ((mHeight - mWidth) / 2.f + mWidth - rectWidth / 2.f);
+        mPfofileRect.left = (int) (30.f / 450 * mWidth);
+        mPfofileRect.bottom = (int) ((mHeight - mWidth) / 2.f + mWidth + rectWidth / 2.f);
+        mPfofileRect.right = (int) (60.f / 450 * mWidth);
+        canvas.drawBitmap(mProfileBitmap, null, mPfofileRect, mProfilePaint);
 
     }
 
@@ -442,5 +466,25 @@ public class HealthView extends View {
         this.mOnLookClickListener = onLookClickListener;
     }
 
+    /**
+     * 转化为圆角bitmap
+     *
+     * @param bitmap
+     * @return
+     */
+    private Bitmap toRoundBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int r = Math.min(width, height);
+        Bitmap bgBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bgBitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);//抗锯齿
+        RectF rectf = new RectF(0, 0, r, r);
+        BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        paint.setShader(bitmapShader);
+        canvas.drawRoundRect(rectf, r / 2, r / 2, paint);
+        return bgBitmap;
+    }
 
 }
