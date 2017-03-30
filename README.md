@@ -1,3 +1,4 @@
 # HealthViewDemo
 运动步数自定义View
-![jietu](https://github.com/HelloCj/HealthViewDemo/health.png)
+
+![截图](https://github.com/HelloCj/HealthViewDemo/blob/master/health.png)
